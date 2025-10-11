@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::init::multiboot2::{header};
 
 #[repr(C)]
@@ -5,6 +6,14 @@ use crate::init::multiboot2::{header};
 pub struct BasicTag {
     pub typ: header::M2TagType,
     pub size: u32,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct CMDLine<'a> {
+	pub typ: u32,
+	pub size: u32,
+	pub string: &'a str
 }
 
 #[repr(C)]
@@ -66,9 +75,10 @@ pub struct AcpiSDTHeader {
 }
 
 #[repr(C, packed)]
-pub struct UsableMemory {
-	start: u64,
-	end: u64,
-	count: u8,
-
+pub struct BootModules<'a> {
+	pub typ: u32,
+	pub size: u32,
+	pub mod_start: u32,
+	pub mod_end: u32,
+	pub string: &'a str
 }

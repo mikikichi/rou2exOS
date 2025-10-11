@@ -12,6 +12,17 @@ pub struct Multiboot2HeaderText {
     tag_end_size: u32,  // = 8
 }
 
+#[repr(C, packed)]
+#[cfg(feature = "kernel_text")]
+pub struct Multiboot2InfoRequest {
+	tag_info_type: u16,
+	tag_info_flags: u16,
+	tag_info_size: u32,
+	tag_info_req1: u32,
+	tag_info_req2: u32
+}
+
+
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".multiboot2_header")]
 #[used]
@@ -21,6 +32,14 @@ pub static MULTIBOOT2_HEADER_TEXT: Multiboot2HeaderText = {
     const ARCH: u32 = 0;
     const HEADER_LEN: u32 = core::mem::size_of::<Multiboot2HeaderText>() as u32;
     const CHECKSUM: u32 = 0u32.wrapping_sub(MAGIC + ARCH + HEADER_LEN);
+
+	Multiboot2InfoRequest{
+		tag_info_type: 1,
+		tag_info_flags: 0,
+		tag_info_size: core::mem::size_of::<Multiboot2InfoRequest>() as u32,
+		tag_info_req1: 6,
+		tag_info_req2: 1
+	};
 
     Multiboot2HeaderText {
         magic: MAGIC,

@@ -2,78 +2,40 @@
 /*use crate::{debug::dump_debug_log_to_file, init::{config::{p1_fb_table, p1_fb_table_2, p2_fb_table, p3_fb_table, p4_table}, font::{draw_text_psf, parse_psf}}, mem, vga::{
     buffer::Color, write::{newline, number, string}
 } };*/
-use crate::init::multiboot2::{header,tags, header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag};
-use crate::{debug};
-/*
-pub fn print_info(multiboot_ptr: u64, mut fb_tag: &FramebufferTag) -> InitResult {
-    unsafe {
-        debug!("Multiboot2 pointer: ");
-        debugn!(multiboot_ptr);
-        debugln!("");
+//Specific tags
+use crate::init::multiboot2::{header,header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag, tags::BootModules as BootModules, tags::CMDLine as CMDLineTag};
+//Parser specifics
+use crate::init::multiboot2::parser::{mmap, module, cmd};
 
-        if parse_multiboot2_info((multiboot_ptr as u64) as usize, fb_tag) > 0 {
-            return InitResult::Passed;
-        }
-    }
-
-    debug!("Multiboot2 pointer: ");
-    debugn!(multiboot_ptr);
-    debugln!("");
-
-    InitResult::Failed
-}
-
-
-
-     let addr = align_up(base_addr, 8);
-
-    // First 4 bytes: total size of the multiboot info
-    let total_size = *(addr as *const u32) as usize;
-
-    let mut ptr = addr + 8;
-    let end = addr + total_size;
-
-    let mut tag_count = 0;
-
-
-*/
-
-
-
-//static mut U_MEM: UsableMemory = UsableMemory{start: 0, end: 0, count: 0}; //change this accordingly!!! placeholder for now
 
  
 pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) {
-
 	if m2_magic != header::MULTIBOOT2_BOOTLOADER_MAGIC {
+		debugln!("Issue");
 		return; //return sysfail here
 	};
-	//alignment to 8
-	//is the & not needed here?
-	let mut m2_tag = m2_ptr.add(8) as *mut BasicTag;
+
+	let mut m2_tag = ((m2_ptr as *mut u8).add(8) ) as *mut BasicTag;
+
 
     while (*m2_tag).typ != TagType::End {
 
         match (*m2_tag).typ {
 
             TagType::CmdLine => {
-				debugn!((*m2_tag).typ);
-				debug!("Cmd");
-
+				let cmdline_tag = m2_tag as *mut CMDLineTag;
+				cmd::cmdline_tag(cmdline_tag);
             }
 
             TagType::Module => { 
-				debugn!((*m2_tag).typ);
-				debugln!("Module");
+				let module_tag = m2_tag as *mut BootModules;
+				module::module_tag(module_tag);
 
             }
 
             TagType::Mmap => {
-				debugn!((*m2_tag).typ);
 				let mmap_tag = m2_tag as *mut MMapTag;
-				memory_map_tag(mmap_tag);
-				debugln!("MMap");
-
+				mmap::memory_map_tag(mmap_tag);
             }
 
             TagType::Framebuffer => {
@@ -84,19 +46,17 @@ pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) {
 
             TagType::AcpiOLD => {
 				debugn!((*m2_tag).typ);
-				debugln!("acpi");
+				debugln!("AcpiOld");
 
             }
 
             _ => {
 				debugn!((*m2_tag).typ);
-				debugln!("Empty");
-
+				debugln!("Not yet implemented");
             }
 		
         }
 	//Could be cleaned up
-	//m2_tag = (((m2_tag as usize) + ((*m2_tag).size as usize) + 7) & !(7)) as *mut BasicTag;
 	m2_tag = (((m2_tag as *mut u8).add((*m2_tag).size as usize + 7)) as usize & !(7)) as *mut BasicTag;
 
 	}
@@ -106,85 +66,8 @@ pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) {
 
 
 
-
-pub unsafe fn memory_map_tag(mmap_tag: *mut MMapTag) {
-	debugln!("Tag start");
-	debugn!(mmap_tag as usize);
-	debugln!("Entry initial");
-	let mut entries = &mut (*mmap_tag).entries as *mut tags::MemoryMapEntry;
-	debugn!(entries);
-	let end = (mmap_tag as *mut u8).add((*mmap_tag).size as usize) as *mut tags::MemoryMapEntry;
-	debugln!("End");
-	debugn!(end);
-	let mut i = 0;
-	while entries < end {
-
-		entries = ((entries as *mut u8).add((*mmap_tag).entry_size as usize)) as *mut tags::MemoryMapEntry;
-		i+=1;
-	}
-	debugln!("Ran");
-	debugn!(i);
-
-
-
-	debugln!("Tag size");
-	debugn!((*mmap_tag).size as usize);
-
-	debugln!("Tag entry sizes");
-	debugn!((*mmap_tag).entry_size as u8);
-
-	debugln!("Last entry");
-	debugn!(entries);
-
-
-
-}
-
 //stashed code for now!!!
 /* 
-
-pub unsafe fn acpi_old_tag() {
-	/* 
-	                debugln!("ACPI v1 Root System Descriptor Pointer tag");
-
-                let acpi_tag = &*(ptr as *const AcpiRSDPTag);
-                debug!("Signature: ");
-                debug!(acpi_tag.signature);
-                debug!("\nOEM: ");
-                debug!(acpi_tag.oemid);
-                debugln!("");
-
-                let acpi_sdt = &*(acpi_tag.rsdt_addr as *const AcpiSDTHeader);
-	*/
-}
-
-pub unsafe fn module_tag() {
-	debug!("Module tag found: ");
-	/* 
-    //let start = *((ptr + 8) as *const u32);
-    //let end = *((ptr + 12) as *const u32);
-    let str_ptr = ptr + 16;
-    let str_len = tag.size as usize - 16;
-    let raw_bytes = core::slice::from_raw_parts(str_ptr as *const u8, str_len);
-
-    let cmdline = core::str::from_utf8_unchecked(raw_bytes);
-    debugln!(cmdline);
-	*/
-}
-
-
-
-pub unsafe fn boot_line_tag() {
-	debug!("Boot command line tag: ");
-
-    /*let str_ptr = ptr + 8;
-    let str_len = tag.size as usize - 8;
-    let raw_bytes = core::slice::from_raw_parts(str_ptr as *const u8, str_len);
-
-    let cmdline = core::str::from_utf8_unchecked(raw_bytes);
-    debugln!(cmdline);
-	*/
-}
 
 pub unsafe fn framebuffer_tag() {
 	debugln!("Framebuffer tag: ");
@@ -248,7 +131,7 @@ pub unsafe fn framebuffer_tag() {
 	*/
 }
 */
-
+//Could be used elsewhere
 /* 
 fn align_up(x: usize, align: usize) -> usize {
     (x + align - 1) & !(align - 1)

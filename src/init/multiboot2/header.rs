@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub const MULTIBOOT_HEADER: u32 = 1;
 
 pub const MULTIBOOT_SEARCH: u32 = 32768;

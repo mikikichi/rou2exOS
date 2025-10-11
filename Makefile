@@ -19,7 +19,7 @@ compile_kernel:
 		--features kernel_text \
 		--target-dir target/kernel_text \
 		--release \
-		-Z build-std=core,compiler_builtins \
+		-Z build-std=core,compiler_builtins\
 		--target x86_64-r2.json
 	@cp target/kernel_text/x86_64-r2/release/kernel.elf iso/boot/kernel_text.elf
 	@cargo build \

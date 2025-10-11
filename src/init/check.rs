@@ -1,5 +1,6 @@
 use crate::debug::dump_debug_log_to_file;
-use crate::init::multiboot2::{tags, parser};
+use crate::init::multiboot2::{tags};
+use crate::init::multiboot2::parser::{main_parser as parser};
 use crate::init::{cpu, idt, heap,pit, fs};
 use crate::video::{vga, sysprint::Result as res};
 
