@@ -10,10 +10,10 @@ pub struct BasicTag {
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct CMDLine<'a> {
+pub struct CMDLineTag {
 	pub typ: u32,
 	pub size: u32,
-	pub string: &'a str
+	pub string: *const i8
 }
 
 #[repr(C)]

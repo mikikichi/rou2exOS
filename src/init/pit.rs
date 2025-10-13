@@ -1,4 +1,5 @@
 use crate::input::port::{read, write};
+use crate::video::sysprint::{Result};
 
 pub fn init_pit(frequency_hz: u32) {
     if frequency_hz == 0 {
@@ -74,12 +75,12 @@ pub unsafe fn io_wait() {
     write(0x80, 0);
 }
 
-/*pub fn get_result() -> super::result::InitResult { //why??? why do this why not just ret value or something??
+pub fn pic_pit_init() -> Result { 
     debugln!("Remapping PIC");
     unsafe { remap_pic(); }
 
     debugln!("Starting 100Hz timer");
     init_pit(1); // 100Hz -> 10ms per tick???
 
-    super::result::InitResult::Passed
-}*/
+    Result::Passed
+}

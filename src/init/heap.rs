@@ -1,9 +1,10 @@
 use crate::mem::bump::{ALLOCATOR};
+use crate::video::sysprint::{Result};
 use core::ptr;
 
 //use super::result::InitResult;
 
-/*pub fn print_result() -> InitResult {
+pub fn pmm_heap_init() -> Result {
     /*if !init_heap_allocator() {
       return InitResult::Failed;
       }*/
@@ -29,15 +30,15 @@ use core::ptr;
             let heap_end = &__heap_end as *const u64 as usize;
 
             if test_addr0 > heap_end || test_addr0 < heap_start {
-                return InitResult::Failed;
+                return Result::Failed;
             }
 
             if test_addr1 > heap_end || test_addr1 < heap_start {
-                return InitResult::Failed;
+                return Result::Failed;
             }
 
             if test_addr2 > heap_end || test_addr2 < heap_start {
-                return InitResult::Failed;
+                return Result::Failed;
             }
 
             let test_node0 = test_addr0 as *mut crate::mem::heap::HeapNode;
@@ -62,8 +63,8 @@ use core::ptr;
         }
     }
 
-    InitResult::Passed
-} */
+    Result::Passed
+} 
 
 fn init_heap_allocator() -> bool {
     debugln!("Heap allocator init start");

@@ -3,16 +3,17 @@
     buffer::Color, write::{newline, number, string}
 } };*/
 //Specific tags
-use crate::init::multiboot2::{header,header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag, tags::BootModules as BootModules, tags::CMDLine as CMDLineTag};
+use crate::init::multiboot2::{header,header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag};
 //Parser specifics
-use crate::init::multiboot2::parser::{mmap, module, cmd};
-
+use crate::init::multiboot2::parser::{mmap};
+use crate::video::sysprint::{Result};
 
  
-pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) {
+pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) -> Result {
 	if m2_magic != header::MULTIBOOT2_BOOTLOADER_MAGIC {
-		debugln!("Issue");
-		return; //return sysfail here
+		
+		return Result::Failed;
+		//make this do more
 	};
 
 	let mut m2_tag = ((m2_ptr as *mut u8).add(8) ) as *mut BasicTag;
@@ -23,45 +24,40 @@ pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) {
         match (*m2_tag).typ {
 
             TagType::CmdLine => {
-				let cmdline_tag = m2_tag as *mut CMDLineTag;
-				cmd::cmdline_tag(cmdline_tag);
-            }
-
-            TagType::Module => { 
-				let module_tag = m2_tag as *mut BootModules;
-				module::module_tag(module_tag);
 
             }
 
             TagType::Mmap => {
 				let mmap_tag = m2_tag as *mut MMapTag;
+
 				mmap::memory_map_tag(mmap_tag);
             }
 
             TagType::Framebuffer => {
-				debugn!((*m2_tag).typ);
-				debugln!("Frame");
 
             }
 
             TagType::AcpiOLD => {
-				debugn!((*m2_tag).typ);
-				debugln!("AcpiOld");
+
+
 
             }
 
             _ => {
-				debugn!((*m2_tag).typ);
-				debugln!("Not yet implemented");
+
             }
 		
         }
 	//Could be cleaned up
 	m2_tag = (((m2_tag as *mut u8).add((*m2_tag).size as usize + 7)) as usize & !(7)) as *mut BasicTag;
 
-	}
+	
 
+	} 
+	
+	Result::Passed
 
+	
  }
 
 
