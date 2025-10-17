@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use crate::init::multiboot2::{header};
-
+use core::ffi::c_char;
 #[repr(C)]
 #[derive(Copy,Clone)]
 pub struct BasicTag {
@@ -9,11 +9,11 @@ pub struct BasicTag {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct CMDLineTag {
 	pub typ: u32,
 	pub size: u32,
-	pub string: *const i8
+	pub string: &'static [u8]
 }
 
 #[repr(C)]

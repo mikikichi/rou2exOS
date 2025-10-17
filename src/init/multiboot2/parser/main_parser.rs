@@ -3,19 +3,20 @@
     buffer::Color, write::{newline, number, string}
 } };*/
 //Specific tags
-use crate::init::multiboot2::{header,header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag};
+use crate::init::multiboot2::{tags, header,header::M2TagType as TagType, tags::BasicTag as BasicTag, tags::MemoryMapTag as MMapTag};
 //Parser specifics
-use crate::init::multiboot2::parser::{mmap};
+use crate::init::multiboot2::parser::{cmd, mmap};
 use crate::video::sysprint::{Result};
 
- 
+#[no_mangle]
+#[inline(never)]
 pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) -> Result {
 	if m2_magic != header::MULTIBOOT2_BOOTLOADER_MAGIC {
 		
 		return Result::Failed;
 		//make this do more
 	};
-
+	print!("Parser");
 	let mut m2_tag = ((m2_ptr as *mut u8).add(8) ) as *mut BasicTag;
 
 
@@ -24,7 +25,8 @@ pub unsafe fn parse_multiboot2_info(m2_ptr: *mut usize, m2_magic: u32) -> Result
         match (*m2_tag).typ {
 
             TagType::CmdLine => {
-
+				let cmdline_tag = m2_tag as *mut tags::CMDLineTag;
+				cmd::cmdline_tag(cmdline_tag);
             }
 
             TagType::Mmap => {

@@ -30,6 +30,11 @@ compile_kernel:
 		--target x86_64-r2.json
 	@cp target/kernel_graphics/x86_64-r2/release/kernel.elf iso/boot/kernel_graphics.elf
 
+
+#add a kernel compilation here for debugging
+
+
+
 build_iso:
 	@grub2-mkrescue \
 		-o r2.iso iso/ \
@@ -113,6 +118,7 @@ run_iso_debug:
 	@qemu-system-x86_64 \
 		-boot d \
 		-m 4G \
+		-s -S \
 		-cdrom r2.iso \
 		-fda fat.img \
 		-no-reboot \
